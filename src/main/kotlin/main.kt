@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
             if (it is KlassDeclaration) {
                 val b = (it.raw?.ast as DefaultAstNode).children.filter { it.description == "functionBody" }
                     .map { (it as DefaultAstNode).children }.flatten().filter { it.description == "block" }
-                println(b)
+                //println(b)
                 b.map { (it as DefaultAstNode).children }.flatten().filter { it.description == "statements" }
                     .map { (it as DefaultAstNode).children }.flatten().filter { it.description == "statement" }
             }
