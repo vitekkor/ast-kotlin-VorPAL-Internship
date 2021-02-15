@@ -1,6 +1,7 @@
 import kotlinx.ast.common.AstSource
 import kotlinx.ast.common.ast.Ast
 import kotlinx.ast.common.ast.DefaultAstNode
+import kotlinx.ast.common.ast.rawAstOrNull
 import kotlinx.ast.common.klass.KlassDeclaration
 import kotlinx.ast.common.klass.KlassIdentifier
 import kotlinx.ast.grammar.kotlin.common.summary
@@ -21,18 +22,23 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
             println("Ast creation for $fileName: Successful!\nStart analyzing...")
             astList.forEach { ast ->
                 if (ast is KlassDeclaration) {
-                    if (ast.keyword == "class") ast.identifier?.identifier?.let { klass ->
-                        inheritances[klass] =
-                            ast.inheritance.map { it.children }.flatten().map { (it as KlassIdentifier).identifier }
+                    if (ast.keyword == "class") {
+                        ast.identifier?.identifier?.let { klass ->
+                            inheritances[klass] =
+                                ast.inheritance.map { it.children }.flatten().map { (it as KlassIdentifier).identifier }
+                        }
 
                         print(ast.description + " ")
 
-                        var a = ast.expressions.asSequence().filter { it.description == "classBody" }
-                            .map { (it as DefaultAstNode).children }
+                        val classBody = ast.expressions.asSequence().filter { it.description == "classBody" }
+                            .map { (it as DefaultAstNode).children }.flatten()
+                        println(countOverrides(classBody))
+                        println(countFields(classBody))
+                        ast.expressions.filter { it.description == "classBody" }.map { (it as DefaultAstNode).children }
                             .flatten()
-                        println(countOverrides(a))
-                        println(countFields(a))
-                        var b = 0
+                            .map { (it.rawAstOrNull()?.ast as DefaultAstNode).children.filter { it.description == "functionBody" } }
+                            .flatten().map { (it as DefaultAstNode).children }.flatten()
+                            .filter { it.description == "block" }.map { (it as DefaultAstNode).children }.flatten()
                     }
 
                     (ast.raw?.ast as DefaultAstNode).children.filter { it.description == "functionBody" }
@@ -51,12 +57,15 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
     }
 
     private fun countFields(astList: Sequence<Ast>): Int {
-        return astList.filter { (it as KlassDeclaration).keyword == "var" || it.keyword == "val" }.count()
+        return astList.filter {
+            val keyWord = (it as KlassDeclaration).keyword
+            keyWord == "var" || keyWord == "val"
+        }.count()
     }
 
     private fun countOverrides(astList: Sequence<Ast>): Int {
-       return astList.filter { (it as KlassDeclaration).keyword == "fun" }
-            .map { (it as KlassDeclaration).modifiers.filter { it.modifier == "override" } }
+        return astList.filter { (it as KlassDeclaration).keyword == "fun" }
+            .map { (it as KlassDeclaration).modifiers.filter { modifier -> modifier.modifier == "override" } }
             .count { it.isNotEmpty() }
     }
 }

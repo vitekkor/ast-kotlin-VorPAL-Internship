@@ -31,7 +31,9 @@ fun main(args: Array<String>) {
 
 class Helloworld() : ParentClass() {
     override fun trrrrya() {
-
+        val source = 65
+        if ("gfgfg" == source.toString()) print("true")
+        val ggVp = ParentClass2()
     }
 
     override fun tr() {
