@@ -30,14 +30,42 @@ fun main(args: Array<String>) {
 }
 
 class Helloworld() : ParentClass() {
+    override fun trrrrya() {
 
+    }
 
+    override fun tr() {
+
+    }
 }
 
-open class ParentClass(): ParentClass2() {
+open class ParentClass() : ParentClass2() {
 
+    override fun tr() {
+    }
+
+    var openVal12 = 5
 }
 
 open class ParentClass2() {
 
+    var openVal = 5
+
+    var openVal1 = 5
+    open fun trrrrya() {
+        val tttrr = 0
+        openVal++
+    }
+
+    open fun tr() {
+
+    }
+
+    open fun trrr() {
+
+    }
+
+    open fun sldksdl() {
+
+    }
 }

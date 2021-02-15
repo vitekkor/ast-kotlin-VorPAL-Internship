@@ -1,4 +1,5 @@
 import kotlinx.ast.common.AstSource
+import kotlinx.ast.common.ast.Ast
 import kotlinx.ast.common.ast.DefaultAstNode
 import kotlinx.ast.common.klass.KlassDeclaration
 import kotlinx.ast.common.klass.KlassIdentifier
@@ -19,14 +20,24 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
         kotlinFile.summary(false).onSuccess { astList ->
             println("Ast creation for $fileName: Successful!\nStart analyzing...")
             astList.forEach { ast ->
-                if (ast is KlassDeclaration && ast.keyword == "class") {
-                    ast.identifier?.identifier?.let { klass ->
-                        inheritances.put(
-                            klass,
-                            ast.inheritance.map { it.children }.flatten().map { (it as KlassIdentifier).identifier })
+                if (ast is KlassDeclaration) {
+                    if (ast.keyword == "class") ast.identifier?.identifier?.let { klass ->
+                        inheritances[klass] =
+                            ast.inheritance.map { it.children }.flatten().map { (it as KlassIdentifier).identifier }
+
+                        print(ast.description + " ")
+
+                        var a = ast.expressions.asSequence().filter { it.description == "classBody" }
+                            .map { (it as DefaultAstNode).children }
+                            .flatten()
+                        println(countOverrides(a))
+                        println(countFields(a))
+                        var b = 0
                     }
+
+                    (ast.raw?.ast as DefaultAstNode).children.filter { it.description == "functionBody" }
                 }
-                ((ast as KlassDeclaration).raw?.ast as DefaultAstNode).children.filter {it.description == "functionBody"}
+
             }
         }.onFailure { errors ->
             println("Can't create AST for file $fileName: $errors")
@@ -37,5 +48,15 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
         for (file in queue) {
             analyze(file.filename)
         }
+    }
+
+    private fun countFields(astList: Sequence<Ast>): Int {
+        return astList.filter { (it as KlassDeclaration).keyword == "var" || it.keyword == "val" }.count()
+    }
+
+    private fun countOverrides(astList: Sequence<Ast>): Int {
+       return astList.filter { (it as KlassDeclaration).keyword == "fun" }
+            .map { (it as KlassDeclaration).modifiers.filter { it.modifier == "override" } }
+            .count { it.isNotEmpty() }
     }
 }
