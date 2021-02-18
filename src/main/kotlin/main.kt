@@ -15,6 +15,8 @@ fun main(args: Array<String>) {
     }
 
     val kotlinFile = KotlinGrammarAntlrKotlinParser.parseKotlinFile(source)
+    if (!Helloworld.equals(true)) print("")
+    Helloworld(55, 55, "").trysom
     val a = kotlinFile.summary(true).onSuccess { list ->
         list.forEach {
             if (it is KlassDeclaration) {
@@ -29,7 +31,7 @@ fun main(args: Array<String>) {
 
 }
 
-class Helloworld() : ParentClass() {
+class Helloworld(val trysom: Int, var t: Int, helpMe: String) : ParentClass(), SomeClass {
     override fun trrrrya() {
         val source = 65
         if ("gfgfg" == source.toString()) print("true")
@@ -39,6 +41,18 @@ class Helloworld() : ParentClass() {
     override fun tr() {
 
     }
+    companion object {
+        const val helloworld = 55
+        val hayHi = 65
+        fun helloWorld2() {
+
+        }
+    }
+
+    class internalClass() {
+        operator fun plus(other: internalClass) {}
+    }
+
 }
 
 open class ParentClass() : ParentClass2() {
@@ -49,7 +63,7 @@ open class ParentClass() : ParentClass2() {
     var openVal12 = 5
 }
 
-open class ParentClass2() {
+open class ParentClass2(): SomeAbstractClass() {
 
     var openVal = 5
 
@@ -71,3 +85,9 @@ open class ParentClass2() {
 
     }
 }
+
+interface SomeClass: SomeClass2
+
+interface SomeClass2
+
+abstract class SomeAbstractClass
