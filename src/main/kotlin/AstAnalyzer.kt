@@ -1,6 +1,7 @@
 import kotlinx.ast.common.AstSource
 import kotlinx.ast.common.ast.Ast
 import kotlinx.ast.common.ast.DefaultAstNode
+import kotlinx.ast.common.ast.rawAstOrNull
 import kotlinx.ast.common.klass.KlassDeclaration
 import kotlinx.ast.common.klass.KlassIdentifier
 import kotlinx.ast.grammar.kotlin.common.summary
@@ -8,6 +9,10 @@ import kotlinx.ast.grammar.kotlin.target.antlr.kotlin.KotlinGrammarAntlrKotlinPa
 import java.util.*
 
 class AstAnalyzer(filesQueue: List<String> = emptyList()) {
+    private val functionList: Deque<DefaultAstNode> = ArrayDeque()
+
+    @Volatile
+    private var assignments = 0
     private val queue = filesQueue.map { AstSource.File(it) }
     private val klassList: Deque<KlassDeclaration> = ArrayDeque()
     private val inheritances = mutableMapOf<String, Set<String>>()
@@ -19,21 +24,42 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
         val kotlinFile = KotlinGrammarAntlrKotlinParser.parseKotlinFile(source)
 
         kotlinFile.summary(false).onSuccess { astList ->
-            println("Ast creation for $fileName: Successful!\nStart analyzing...")
+            println("Ast creation for $fileName : Successful!\nStart analyzing...")
             astList.forEach { ast ->
                 if (ast is KlassDeclaration) {
                     when (ast.keyword) {
                         "class" -> analyzeKlass(ast)
                         "interface" -> analyzeInterface(ast)
+                        "fun" -> analyzeFun(ast as Ast)
                     }
-
-                    (ast.raw?.ast as DefaultAstNode).children.filter { it.description == "functionBody" }
                 }
 
             }
         }.onFailure { errors ->
             println("Can't create AST for file $fileName : $errors")
         }
+
+    }
+
+    private fun analyzeFun(function: Ast) {
+        val parsed = (function.rawAstOrNull()?.ast as DefaultAstNode).children.filterIsInstance<DefaultAstNode>()
+            .filter { it.description == "functionBody" }.map { it.children }.flatten()
+            .map { (it as DefaultAstNode).children.filterIsInstance<DefaultAstNode>() }.flatten().map { it.children }
+            .flatMap {
+                val result = ArrayList<DefaultAstNode>()
+                for (element in it) {
+                    if (element is DefaultAstNode && element.description == "statement") result.add(element)
+                }
+                result
+            }.map { it.children }.flatten()
+        assignments += parsed.count { it.description == "assignment" }
+
+        functionList.addAll(parsed.map { ast -> (ast as DefaultAstNode).children.filter { it.description == "functionDeclaration" } }
+            .flatten().map { it as DefaultAstNode })
+        //TODO("Not yet implemented")
+    }
+
+    private fun expandFunctionList() {
 
     }
 
@@ -51,8 +77,6 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
                 klassDeclaration.inheritance.map { it.children }.flatten().map { (it as KlassIdentifier).identifier }
                     .toHashSet()
         }
-
-        //print(klassDeclaration.description + " ")
 
         val klassBody = klassDeclaration.expressions.asSequence().filter { it.description == "classBody" }
             .map { (it as DefaultAstNode).children }.flatten()

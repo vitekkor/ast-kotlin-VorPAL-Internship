@@ -9,6 +9,8 @@ fun main(args: Array<String>) {
     val source = AstSource.File(
         "D:\\IdeaProjects\\ast-kotlin\\src\\main\\kotlin\\main.kt"
     )
+    var h = 0
+    h = 5
 
     fun kekw() {
         val tr = 10
