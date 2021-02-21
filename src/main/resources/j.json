@@ -1,0 +1,11 @@
+{ 
+  "Ast": {
+    "Max_Inheritances": 3,
+    "Average_Inheritances": 0.8055555555555556,
+    "Average_Overrides": 0.4,
+    "Average_Fields": 9.142857142857142,
+    "Assignments": 53,
+    "Branches": 920,
+    "Conditions": 43
+  }
+}

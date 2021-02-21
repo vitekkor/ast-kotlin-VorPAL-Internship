@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Ast>
+    <Max_Inheritances>3</Max_Inheritances>
+    <Average_Inheritances>0.8055555555555556</Average_Inheritances>
+    <Average_Overrides>0.4</Average_Overrides>
+    <Average_Fields>9.142857142857142</Average_Fields>
+    <Assignments>53</Assignments>
+    <Branches>920</Branches>
+    <Conditions>43</Conditions>
+</Ast>
