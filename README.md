@@ -14,5 +14,3 @@ Just enter the path to the folder with the project on Kotlin or to the separate 
 
 positional arguments:
   KOTLIN-PROJECT-OR-FILE   Paths to kotlin projects or files
-
-If the arguments are incorrect, a corresponding error message is generated
