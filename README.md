@@ -1,13 +1,18 @@
 # ast-kotlin-VorPAL-Internship
 
-## Use
+## Usage
 
 Just enter the path to the folder with the project on Kotlin or to the separate file (s).
 
-optional arguments:
+ Command Line: `KOTLIN-PROJECT-OR-FILE... [-x XML] [-j JSON] [-y YAML]`
 
--x,--xml - path to the report file in xml format
+- `-h, --help`               show this help message and exit
+- `-x XML, --xml XML`        Path to xml report file
+- `-j JSON, --json JSON`     Path to json report file
+- `-y YAML, --yaml YAML`     Path to yaml report file
 
--j, --json - path to the report file in json format
 
--y, --yaml - path to the report file in yaml format
+positional arguments:
+  KOTLIN-PROJECT-OR-FILE   Paths to kotlin projects or files
+
+If the arguments are incorrect, a corresponding error message is generated
