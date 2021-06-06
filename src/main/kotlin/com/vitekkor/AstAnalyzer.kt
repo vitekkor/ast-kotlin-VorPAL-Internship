@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
@@ -50,28 +49,31 @@ class AstAnalyzer(filesQueue: List<String> = emptyList()) {
     }
 
     private fun analyze(source: AstSource.File) {
-        val kotlinFile = KotlinGrammarAntlrKotlinParser.parseKotlinFile(source)
-
-        kotlinFile.summary(false).onSuccess { astList ->
-            println("Ast creation for ${source.filename} : Successful!\nStart analyzing...")
-            astList.forEach { ast ->
-                if (ast is KlassDeclaration) {
-                    when (ast.keyword) {
-                        "class" -> analyzeKlass(ast)
-                        "object" -> analyzeKlass(ast)
-                        "interface" -> analyzeInterface(ast)
-                        "fun" -> analyzeFun(ast as Ast)
+        try {
+            val kotlinFile = KotlinGrammarAntlrKotlinParser.parseKotlinFile(source)
+            kotlinFile.summary(false).onSuccess { astList ->
+                println("Ast creation for ${source.filename} : Successful!\nStart analyzing...")
+                astList.forEach { ast ->
+                    if (ast is KlassDeclaration) {
+                        when (ast.keyword) {
+                            "class" -> analyzeKlass(ast)
+                            "object" -> analyzeKlass(ast)
+                            "interface" -> analyzeInterface(ast)
+                            "fun" -> analyzeFun(ast as Ast)
+                        }
                     }
                 }
+            }.onFailure { errors ->
+                println("Can't create AST for file $source : $errors")
             }
-        }.onFailure { errors ->
-            println("Can't create AST for file $source : $errors")
+            while (klassList.isNotEmpty() || functionList.isNotEmpty()) {
+                analyzeKlass(klassList.poll())
+                analyzeFun(functionList.poll())
+            }
+            println("Analysis ${source.filename} completed!")
+        } catch (e: Exception) {
+            println("Can't analyze ${source.filename}: ${e.message}")
         }
-        while (klassList.isNotEmpty() || functionList.isNotEmpty()) {
-            analyzeKlass(klassList.poll())
-            analyzeFun(functionList.poll())
-        }
-        println("Analysis ${source.filename} completed!")
     }
 
     private fun analyzeFun(function: Ast?) {
