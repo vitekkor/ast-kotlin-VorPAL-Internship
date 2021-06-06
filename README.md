@@ -1,5 +1,15 @@
 # ast-kotlin-VorPAL-Internship
 
+A simple Kotlin code analyzer.
+
+During the work, a tree is built, which displays the structure of the program required to build the following metrics:
+
+1. Maximum inheritance depth
+2. Average depth of inheritance
+3. Average number of overridden methods
+4. Average number of fields in a class
+5. ABC metric
+
 ## Usage
 
 Just enter the path to the folder with the project on Kotlin or to the separate file (s).
